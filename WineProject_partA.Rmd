@@ -1,0 +1,100 @@
+---
+title: "Wine Project part A"
+author: "Hart Williams"
+date: "2026-09-07"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+data <- read.csv2(file = "winequality-red.csv", header = T)
+
+nrow(data)
+```
+# a. What is the sample size?
+The sample size for the red wine testing is 1,599.
+
+# b. Any outliers? Do you have any concerns about the data quality?
+As tested below, none of the variables contain any missing values.
+
+As shown in the plots, some variables have one or a few outliers, such as volatile acidity. With nearly 1,600 observations, these individual observations should not be a major concern. Several variables are fairly concentrated, while others are more spread out and contain multiple smaller clusters and/or potential outliers.
+
+Based on the information available and the patterns observed in the data, I do not have any major concerns about data quality.
+
+The response variable, quality, is concentrated primarily around ratings of 5 and 6. There are somewhat more observations with ratings of 7 and 8 than with ratings of 3 and 4, but this does not appear to be a major concern. Overall, the data appear suitable for building a model.
+
+```{r}
+summary(data)
+```
+```{r}
+# Convert character variables to numeric
+data$fixed.acidity <- as.numeric(data$fixed.acidity)
+data$volatile.acidity <- as.numeric(data$volatile.acidity)
+data$citric.acid <- as.numeric(data$citric.acid)
+data$residual.sugar <- as.numeric(data$residual.sugar)
+data$chlorides <- as.numeric(data$chlorides)
+data$free.sulfur.dioxide <- as.numeric(data$free.sulfur.dioxide)
+data$total.sulfur.dioxide <- as.numeric(data$total.sulfur.dioxide)
+data$density <- as.numeric(data$density)
+data$pH <- as.numeric(data$pH)
+data$sulphates <- as.numeric(data$sulphates)
+data$alcohol <- as.numeric(data$alcohol)
+```
+
+```{r}
+summary(data)
+
+# plot(data$fixed.acidity)
+plot(data$volatile.acidity)
+# plot(data$citric.acid)
+plot(data$residual.sugar)
+# plot(data$chlorides)
+# plot(data$free.sulfur.dioxide)
+# plot(data$total.sulfur.dioxide)
+# plot(data$density)
+# plot(data$pH)
+# plot(data$sulphates)
+# plot(data$alcohol)
+plot(data$quality)
+```
+
+# c. How can you summarize the data of each variable in a concise way? What statistics are you going to present?
+I can compare the mean and median of each variable to identify differences in their distributions and potential skewness. I will also present the minimum, maximum, and quartiles to show the range and how concentrated or spread out each variable is.
+
+```{r}
+# Example for statistics to present
+summary(data$fixed.acidity)
+quantile(data$fixed.acidity, p=c(0.1,0.25,0.5,0.75,0.9))
+```
+# d. How can you visualize the distribution of each variable?
+In addition to the scatter plots from before, I can use histograms to visualize the distribution and spread of each variable.
+
+```{r}
+# Example histogram
+hist(data$fixed.acidity, main="Histogram of Fixed Acidity")
+```
+
+# e. Do you see any skewed distributions?
+While some histograms, such as density, appear fairly normally distributed, several variables, such as alcohol, appear to be right-skewed. I did not observe any variables with an obvious left skew.
+
+```{r}
+# Histograms for every other variable
+
+# hist(data$volatile.acidity, main="Histogram of Volatile Acidity")
+# hist(data$citric.acid, main="Histogram of Citric Acid")
+# hist(data$residual.sugar, main="Histogram of Residual Sugar")
+# hist(data$chlorides, main="Histogram of Chlorides")
+# hist(data$free.sulfur.dioxide, main="Histogram of Free Sulfur Dioxide")
+# hist(data$total.sulfur.dioxide, main="Histogram of Total Sulfur Dioxide")
+hist(data$density, main="Histogram of Density")
+# hist(data$pH, main="Histogram of pH")
+# hist(data$sulphates, main="Histogram of Sulphates")
+hist(data$alcohol, main="Histogram of Alcohol")
+# hist(data$quality, main="Histogram of Quality")
+```
