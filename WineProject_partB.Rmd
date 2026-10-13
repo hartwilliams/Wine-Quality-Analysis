@@ -1,0 +1,239 @@
+---
+title: "Wine Project part B"
+author: "Hart Williams"
+date: "2026-09-21"
+output:
+  word_document: default
+  html_document: default
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+data <- read.csv2(file = "winequality-red.csv", header = T)
+
+# Convert character variables to numeric
+data$residual.sugar <- as.numeric(data$residual.sugar)
+data$density <- as.numeric(data$density)
+```
+
+# 1a.
+```{r}
+mean(data$density)
+```
+An estimate for μ based on the sample is x_bar = 0.9967.
+
+# 1b.
+```{r}
+n <- length(data$density)
+s <- sd(data$density)
+se <- s / sqrt(n)
+se
+```
+- The Central Limit Theorem holds that the sampling distribution of x_bar is approximately normal, centered at μ, with standard deviation SE = σ / √n. This standard error is our quantification of variability, expressing how much our estimate x_bar would typically bounce around from sample to sample.
+
+- The standard error of the sample is ~0.000047.
+
+# 1c. 
+```{r}
+x_bar <- mean(data$density)
+lower <- x_bar - 1.96 * se
+upper <- x_bar + 1.96 * se
+c(lower, upper)
+```
+- Using the standard error from part b, the 95% confidence interval for μ is x_bar ± 1.96 * SE, which gives us approximately (0.9966, 0.9968).
+
+# 1d. 
+```{r}
+set.seed(50)
+
+# n = 1599
+boot_means <- numeric(2000)
+
+# Repeat sampling 2000 times
+for(k in 1:2000){
+  boot_sample <- sample(data$density, size = n, replace = T)
+  boot_means[k] <- mean(boot_sample)
+}
+
+boot_se <- sd(boot_means)
+boot_se
+
+quantile(boot_means, probs=c(0.025,0.975))
+```
+- Bootstrap sampling produced a standard error of ~0.000048 and a 95% CI of ~(0.9966, 9968).
+- The results from the CLT and bootstrap were very close, with bootstrap having a slightly greater standard error and slightly wider confidence interval.
+- Because the two methods produce nearly identical estimates, we can be confident that the CLT-based inference is reliable for this variable, and the small differences are attributable to resampling variability rather than a violation of CLT assumptions.
+
+
+# 2a.
+```{r}
+mean(data$residual.sugar)
+```
+- An estimate for μ based on the sample is x_bar = 2.5388.
+
+# 2b. 
+```{r}
+hist(data$residual.sugar)
+```
+- Yes, we can still use the CLT to quantify the variability of our estimate. The CLT does not require the original data to be normally distributed. It says that as n gets large, the sampling distribution of x_bar becomes approximately normal, regardless of the shape of population distribution.
+
+- Skewness in the raw data slows down how quickly this convergence happens, so you do need a large enough n for the approximation to be good. However, with n = 1,599, the CLT approximation for x_bar should hold reasonably well.
+
+```{r}
+# n = 1599
+s <- sd(data$residual.sugar)
+se <- s / sqrt(n)
+se
+
+x_bar <- mean(data$residual.sugar)
+lower <- x_bar - 1.96 * se
+upper <- x_bar + 1.96 * se
+c(lower, upper)
+```
+- The standard error of the sample is ~0.0352, and the 95% confidence interval for μ is x_bar ± 1.96 * SE, which gives us approximately (2.4697, 2.6079).
+
+# 2c. 
+```{r}
+set.seed(50)
+
+# n = 1599
+boot_means <- numeric(2000)
+
+# Repeat sampling 2000 times
+for(k in 1:2000){
+  boot_sample <- sample(data$residual.sugar, size = n, replace = T)
+  boot_means[k] <- mean(boot_sample)
+}
+
+boot_se <- sd(boot_means)
+boot_se
+
+quantile(boot_means, probs=c(0.025,0.975))
+```
+- Bootstrap sampling produced a standard error of ~0.0351 and a 95% CI of ~(2.4756, 2.6109).
+- As was the case with density, bootstrap sampling and CLT produced nearly identical results, with bootstrap sampling producing a slightly lower standard error this time.
+
+```{r}
+hist(boot_means, freq = FALSE)
+lines(density(boot_means), lwd=5, col='blue')
+```
+- The bootstrap distribution for residual sugar appears fairly symmetric.
+
+
+# 3a.
+```{r}
+# Create new variable excellent: 1 if quality >= 7, 0 otherwise
+data$excellent <- ifelse(data$quality >= 7, 1, 0)
+table(data$excellent)
+```
+
+```{r}
+# n = 1599
+s <- sd(data$excellent)
+se <- s / sqrt(n)
+se
+
+p_hat <- mean(data$excellent)
+lower <- p_hat - 1.96 * se
+upper <- p_hat + 1.96 * se
+c(lower, upper)
+```
+- The standard error of the sample is ~0.0086, and the 95% confidence interval for p is p_hat ± 1.96 * SE, which gives us approximately (0.1189, 0.1525).
+
+# 3b.
+```{r}
+set.seed(50)
+
+# n = 1599
+boot_means <- numeric(2000)
+
+# Repeat sampling 2000 times
+for(k in 1:2000){
+  boot_sample <- sample(data$excellent, size = n, replace = T)
+  boot_means[k] <- mean(boot_sample)
+}
+
+boot_se <- sd(boot_means)
+boot_se
+
+quantile(boot_means, probs=c(0.025,0.975))
+```
+- Bootstrap sampling produced a standard error of ~0.0086 and a 95% CI of ~(0.1194, 0.1532).
+
+# 3c.
+- Yes, the bootstrap CI is wider and shifted right relative to the CLT CI. This suggests the sampling distribution of p_hat is not well approximated by a normal distribution, likely because the proportion of excellent wines is small. In this case, bootstrap is likely more trustworthy, since it does not rely on a symmetry assumption.
+
+
+
+# 1e.
+```{r}
+# Histogram with PDF of normal distribution overlaid
+hist(data$density, freq = FALSE, breaks = 50)
+curve(dnorm(x, mean(data$density), sd(data$density)), add = TRUE, col = "red")
+
+hist(data$density, freq = FALSE, breaks = 100)
+curve(dnorm(x, mean(data$density), sd(data$density)), add = TRUE, col = "red")
+```
+- The fit remains close with 50 bins. At 100 bins, the central bars rise above the curve, which reflects the discreteness of the recorded density values and narrow bin widths rather than a significant break from normality.
+- Overall, a normal distribution is a reasonable model for density.
+
+# Did this question incorrectly: used logsigma instead of normal sigma for some reason.
+# density follows a normal distribution, hence why sigma should be used.
+```{r}
+# MLE approach from class
+library(stats4)
+x <- data$density
+
+minuslog.lik <- function(mu, logsigma) {
+  -sum(dnorm(x, mean = mu, sd = exp(logsigma), log = TRUE))
+}
+
+est <- mle(minuslog = minuslog.lik,
+           start = list(mu = mean(x), logsigma = log(sd(x))))
+
+summary(est)
+```
+# 2d.
+```{r}
+hist(data$residual.sugar, freq = FALSE, breaks = 100)
+curve(dnorm(x, mean(data$residual.sugar), sd(data$residual.sugar)), add = TRUE, col = "red")
+```
+- A normal distribution is not a reasonable model for residual sugar, as it is right-skewed with a long upper tail.
+- Alternative: lognormal
+- Two parameters are needed: the mean and SD of log(X).
+
+```{r}
+# library(stats4)
+x <- data$residual.sugar
+lx <- log(x)
+
+minuslog.lik <- function(meanlog, logsdlog) {
+  -sum(dlnorm(x, meanlog = meanlog, sdlog = exp(logsdlog), log = TRUE))
+}
+
+est <- mle(minuslog = minuslog.lik,
+           start = list(meanlog = mean(lx), logsdlog = log(sd(lx))))
+
+summary(est)
+```
+# 3d.
+```{r}
+# library(stats4)
+x_succ <- sum(data$excellent)   # number of excellent wines
+n      <- length(data$excellent)
+
+minuslog.lik <- function(p) {
+  -log(dbinom(x = x_succ, size = n, prob = p))
+}
+
+est <- mle(minuslog = minuslog.lik,
+           start = list(p = x_succ / n),
+           method = "L-BFGS-B",
+           lower = 1e-6, upper = 1 - 1e-6)
+
+summary(est)
+```
+
+
