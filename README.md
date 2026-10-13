@@ -1,1 +1,6 @@
-This is a project for BANA 7051: Applied Statistical Methods. So far I have only completed part A, which was mostly taking a look at the data in R for general trends. I used the red wine data from this paper and analysis: https://www.sciencedirect.com/science/article/abs/pii/S0167923609001377?via%3Dihub.
+This is a set of assignments for BANA 7051: Applied Statistical Methods. It uses the red wine data from a popular Wine Quality Dataset.
+Part A examined the data in R for general trends.
+Part B focused on applying the Central Limit Theorem (CLT) and bootstrap sampling.
+Part C involved hypothesis testing and creating sub-groups to test.
+
+
