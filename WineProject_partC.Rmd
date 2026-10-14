@@ -1,0 +1,121 @@
+---
+title: "Wine Project Part C"
+author: "Hart Williams"
+date: "2026-10-09"
+output:
+  word_document: default
+  html_document: default
+---
+```{r}
+data <- read.csv2(file = "winequality-red.csv", header = T)
+
+# Convert character variables to numeric
+data$residual.sugar <- as.numeric(data$residual.sugar)
+data$density <- as.numeric(data$density)
+# Create new variable excellent: 1 if quality >= 7, 0 otherwise
+data$excellent <- ifelse(data$quality >= 7, 1, 0)
+```
+
+# Question 1.
+```{r}
+attach(data)
+summary(residual.sugar)
+```
+```{r}
+resid_sugar_group <- ifelse(residual.sugar < 2.2, 0, 1)
+table(resid_sugar_group)
+```
+# 1a)
+Null hypothesis (H0): The population mean density is the same in Group A and Group B.
+H0: μ_A = μ_B.
+
+# 1b)
+```{r}
+boxplot(density ~ resid_sugar_group)
+```
+The boxplots show that Group B’s interquartile range begins at approximately Group A’s median (about 0.996), and Group B’s median (about 0.997) is higher than Group A’s.
+
+Although the absolute difference is small because density varies over a narrow range, it is large relative to the within-group spread. The groups overlap, but B is clearly shifted upward, so the hypothesis that μ_A = μ_B does not appear to be right.
+
+# 1c)
+I used a (Welch Two Sample) t-test to compare the mean density of Group A and Group B.
+```{r}
+
+t.test(density ~ resid_sugar_group)
+```
+# 1d)
+The p-value is less than 2.2 * 10^-16.
+
+# 1e)
+Since the p-value (< 2.2 * 10^-16) is far below any usual significance level (e.g. 0.05), we reject the null hypothesis. There is strong evidence that the population mean density differs between Group A (lower residual sugar) and Group B (higher residual sugar).
+
+Group B has the higher mean density, which agrees with the boxplots.
+
+# 1f)
+Yes. Because the groups are defined by residual sugar, a difference in mean density indicates that density is associated with residual sugar: higher sugar goes with higher density. This shows association only, not causation.
+
+# Question 2.
+
+```{r}
+summary(residual.sugar)
+resid_sugar_group2 <- integer(1599)
+
+for(i in 1:1599){
+  if(residual.sugar[i]<=1.9) resid_sugar_group2[i]<-1
+    else if(residual.sugar[i]<=2.2) resid_sugar_group2[i]<-2
+      else if(residual.sugar[i]<=2.6) resid_sugar_group2[i]<-3
+        else resid_sugar_group2[i]<-4
+}
+  
+table(resid_sugar_group2)
+```
+# 2a)
+Null hypothesis (H0): The population mean density is the same in all four groups.
+H0: μ_A = μ_B = μ_C = μ_D
+where: Group A is at or below Q1, Group B is between Q1 and median, Group C is between
+the median and Q3, and Group D is above Q3.
+
+# 2b)
+```{r}
+boxplot(density ~ resid_sugar_group2)
+```
+The boxplots suggest the hypothesis is not right. 
+
+Group 2 has a median similar to Group 1’s, but its IQR sits higher. Group 3 has a visibly higher median, and its IQR overlaps with Groups 1 and 2. Group 4 has a higher median still, with an IQR notably above the others but still overlapping with them. Overall, density increases with residual sugar, so the group means do not appear to be equal.
+
+# 2c)
+I used a one-way ANOVA, which tests whether the population means of several groups are all equal.
+```{r}
+summary(aov(density ~ resid_sugar_group2))
+```
+# 2d)
+The p-value is less than 2 * 10^-16.
+
+# 2e)
+Since the p-value (< 2 * 10^-16) is far below any usual significance level (e.g. 0.05), we reject the null hypothesis. There is strong evidence that the population mean density is not the same across all four groups, which agrees with the boxplots.
+
+# 2f)
+Yes. The groups are defined entirely by residual sugar, so a difference in mean density across them means that density varies with residual sugar. The boxplots show the direction: density rises as sugar increases. As before, this is association, not causation.
+
+- This result matches Question 1, where the two-group test also rejected H0, but with four groups we can see the increasing trend rather than just a high/low difference. More groups retain more information about residual.sugar, so they can help reveal the association.
+- However, dividing into 10 groups would leave fewer observations per group, making each group mean noisier, and it would still be an arbitrary way to split a continuous variable. A correlation test or regression using residual.sugar directly would be a better way to identify the association.
+
+# Question 3.
+```{r}
+tab <- table(resid_sugar_group2, excellent)
+tab
+```
+# 3a)
+```{r}
+chisq.test(tab)
+```
+# 3b)
+```{r}
+chisq.test(tab, simulate.p.value = T)
+```
+- Both p-values are above 0.05, so we fail to reject the null hypothesis.
+- The two p-values are very close, so the chi-square approximation and the permutation test agree.
+
+# 3c)
+- Based on these results, we cannot conclude that residual.sugar is a significant factor contributing to the excellence of wine. The data do not show that the proportion of excellent wines differs across the four residual.sugar groups.
+- However, this does not prove that residual.sugar has no effect. It means that this test did not detect a statistically significant association between residual.sugar group and excellence, and other variables such as alcohol or acidity may matter more.
